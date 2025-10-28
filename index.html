@@ -6,7 +6,7 @@
   <title>Wishlist Mirror</title>
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Syne Mono', sans-serif;
       background: url('https://res.cloudinary.com/eventmobi/image/upload/v1759502727/_James%20Assets/.test%20app%20assets/MML%20October%202025/218016_small-ezgif.com-video-to-gif-converter.gif') no-repeat center center fixed;
       background-size: cover;
       margin: 0;
@@ -21,14 +21,11 @@
     }
 
     .login-btn {
-      background-color: rgba(255, 255, 255, 0.2);
-      border: 1px solid #fff;
-      border-radius: 8px;
-      padding: 8px 14px;
       color: #fff;
       cursor: pointer;
       font-weight: bold;
       transition: all 0.3s ease;
+      text-transform:underline;
     }
 
     .login-btn:hover {
@@ -60,6 +57,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
+      width:30%;
     }
 
     button:hover {
@@ -85,9 +83,9 @@
 
   <div class="container">
     <h2>🔮 The Wishlist Mirror 🔮</h2>
-    <p>Summon the secret name of your fate and let the mirror unveil their desires...</p>
+    <p>Summon the secret name of your fate and let the mirror unveil that person's desires...</p>
     <input type="text" id="codeName" placeholder="Enter Code Name" />
-    <button onclick="lookupWish()">Reveal</button>
+    <button onclick="lookupWish()">Reveal!</button>
 
     <div id="result"></div>
   </div>
