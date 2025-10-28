@@ -3,108 +3,173 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wish Lookup</title>
+  <title>Wishlist Mirror</title>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f4f4f4;
-      padding: 20px;
-      text-align: center;
+      background: url('https://res.cloudinary.com/eventmobi/image/upload/v1759502727/_James%20Assets/.test%20app%20assets/MML%20October%202025/218016_small-ezgif.com-video-to-gif-converter.gif') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      color: #fff;
     }
+
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px;
+    }
+
+    .login-btn {
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 1px solid #fff;
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+
     .container {
-      background: white;
       max-width: 420px;
-      margin: auto;
-      padding: 20px;
+      margin: 60px auto;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
+
     input, button {
       width: 100%;
       padding: 10px;
       margin: 6px 0;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: none;
       font-size: 16px;
     }
+
     button {
-      background-color: #333;
+      background-color: #ff8c00;
       color: white;
+      font-weight: bold;
       cursor: pointer;
+      transition: 0.3s;
     }
+
     button:hover {
-      background-color: #555;
+      background-color: #ffae42;
     }
-    pre {
-      text-align: left;
-      background: #f0f0f0;
+
+    #result {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.1);
       padding: 10px;
       border-radius: 8px;
-      overflow-x: auto;
+    }
+
+    #adminSection {
+      display: none;
     }
   </style>
 </head>
 <body>
+  <div class="header">
+    <button class="login-btn" onclick="showLogin()">Admin Login</button>
+  </div>
+
   <div class="container">
-    <h2>Wish Lookup</h2>
-    <input type="text" id="codeName" placeholder="Enter Code Name">
-    <button onclick="fetchData()">Search</button>
+    <h2>🔮 The Wishlist Mirror 🔮</h2>
+    <p>Summon the secret name of your fate and let the mirror unveil their desires...</p>
+    <input type="text" id="codeName" placeholder="Enter Code Name" />
+    <button onclick="lookupWish()">Reveal</button>
+
     <div id="result"></div>
+  </div>
 
-    <hr>
-
+  <!-- Hidden Admin Section -->
+  <div class="container" id="adminSection">
     <h3>Add New Entry</h3>
-    <input type="text" id="newCodeName" placeholder="Code Name">
-    <input type="text" id="newWish1" placeholder="Wish 1">
-    <input type="text" id="newWish2" placeholder="Wish 2">
-    <input type="text" id="newWish3" placeholder="Wish 3">
+    <input type="text" id="newCodeName" placeholder="Code Name" />
+    <input type="text" id="wish1" placeholder="Wish 1" />
+    <input type="text" id="wish2" placeholder="Wish 2" />
+    <input type="text" id="wish3" placeholder="Wish 3" />
     <button onclick="addEntry()">Add Entry</button>
-    <div id="addResult"></div>
+    <p id="adminMessage"></p>
   </div>
 
   <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbyPJL5p7lvCsQB4_C_ylYjJuo4xrnBqq7q9AaNssq4k6AItS2vhq3uG4D-8zej6qUqe/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyPJL5p7lvCsQB4_C_ylYjJuo4xrnBqq7q9AaNssq4k6AItS2vhq3uG4D-8zej6qUqe/exec";
 
-    async function fetchData() {
+    // Look up wish by code name
+    async function lookupWish() {
       const codeName = document.getElementById("codeName").value.trim();
-      if (!codeName) return alert("Please enter a code name.");
+      if (!codeName) {
+        alert("Please enter a Code Name");
+        return;
+      }
 
-      const res = await fetch(`${webAppUrl}?action=get&codeName=${encodeURIComponent(codeName)}`);
-      const data = await res.json();
+      const response = await fetch(`${scriptURL}?action=lookup&codeName=${encodeURIComponent(codeName)}`);
+      const data = await response.json();
+
       const resultDiv = document.getElementById("result");
-
-      if (data.error) {
-        resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
-      } else {
+      if (data && data.found) {
         resultDiv.innerHTML = `
-          <h4>Wishes for ${data["Code Name"]}</h4>
-          <ul style="text-align:left;">
-            <li><strong>Wish 1:</strong> ${data["Wish 1"]}</li>
-            <li><strong>Wish 2:</strong> ${data["Wish 2"]}</li>
-            <li><strong>Wish 3:</strong> ${data["Wish 3"]}</li>
-          </ul>
+          <h3>✨ ${data.codeName}</h3>
+          <p><strong>Wish 1:</strong> ${data.wish1}</p>
+          <p><strong>Wish 2:</strong> ${data.wish2}</p>
+          <p><strong>Wish 3:</strong> ${data.wish3}</p>
         `;
+      } else {
+        resultDiv.innerHTML = `<p>No data found for "<strong>${codeName}</strong>" 😢</p>`;
       }
     }
 
+    // Admin Login
+    function showLogin() {
+      const password = prompt("Enter admin password:");
+      if (password === "escape2025") {
+        document.getElementById("adminSection").style.display = "block";
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } else {
+        alert("Incorrect password!");
+      }
+    }
+
+    // Add new entry
     async function addEntry() {
-      const codeName = document.getElementById("newCodeName").value.trim();
-      const wish1 = document.getElementById("newWish1").value.trim();
-      const wish2 = document.getElementById("newWish2").value.trim();
-      const wish3 = document.getElementById("newWish3").value.trim();
+      const newCodeName = document.getElementById("newCodeName").value.trim();
+      const wish1 = document.getElementById("wish1").value.trim();
+      const wish2 = document.getElementById("wish2").value.trim();
+      const wish3 = document.getElementById("wish3").value.trim();
 
-      if (!codeName) return alert("Please enter a code name.");
+      if (!newCodeName || !wish1 || !wish2 || !wish3) {
+        alert("Please fill out all fields.");
+        return;
+      }
 
-      const params = new URLSearchParams({
-        action: "add",
-        codeName, wish1, wish2, wish3
+      const response = await fetch(scriptURL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "add",
+          codeName: newCodeName,
+          wish1,
+          wish2,
+          wish3
+        })
       });
 
-      const res = await fetch(`${webAppUrl}?${params}`);
-      const data = await res.json();
-      document.getElementById("addResult").innerHTML = data.success
-        ? "<p style='color:green;'>Entry added successfully!</p>"
-        : "<p style='color:red;'>Error adding entry.</p>";
+      const result = await response.text();
+      document.getElementById("adminMessage").innerText = result;
+      document.getElementById("newCodeName").value = "";
+      document.getElementById("wish1").value = "";
+      document.getElementById("wish2").value = "";
+      document.getElementById("wish3").value = "";
     }
   </script>
 </body>
