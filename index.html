@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wish Lookup</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      background: white;
+      max-width: 420px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    pre {
+      text-align: left;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Wish Lookup</h2>
+    <input type="text" id="codeName" placeholder="Enter Code Name">
+    <button onclick="fetchData()">Search</button>
+    <div id="result"></div>
+
+    <hr>
+
+    <h3>Add New Entry</h3>
+    <input type="text" id="newCodeName" placeholder="Code Name">
+    <input type="text" id="newWish1" placeholder="Wish 1">
+    <input type="text" id="newWish2" placeholder="Wish 2">
+    <input type="text" id="newWish3" placeholder="Wish 3">
+    <button onclick="addEntry()">Add Entry</button>
+    <div id="addResult"></div>
+  </div>
+
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyPJL5p7lvCsQB4_C_ylYjJuo4xrnBqq7q9AaNssq4k6AItS2vhq3uG4D-8zej6qUqe/exec";
+
+    async function fetchData() {
+      const codeName = document.getElementById("codeName").value.trim();
+      if (!codeName) return alert("Please enter a code name.");
+
+      const res = await fetch(`${webAppUrl}?action=get&codeName=${encodeURIComponent(codeName)}`);
+      const data = await res.json();
+      const resultDiv = document.getElementById("result");
+
+      if (data.error) {
+        resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+      } else {
+        resultDiv.innerHTML = `
+          <h4>Wishes for ${data["Code Name"]}</h4>
+          <ul style="text-align:left;">
+            <li><strong>Wish 1:</strong> ${data["Wish 1"]}</li>
+            <li><strong>Wish 2:</strong> ${data["Wish 2"]}</li>
+            <li><strong>Wish 3:</strong> ${data["Wish 3"]}</li>
+          </ul>
+        `;
+      }
+    }
+
+    async function addEntry() {
+      const codeName = document.getElementById("newCodeName").value.trim();
+      const wish1 = document.getElementById("newWish1").value.trim();
+      const wish2 = document.getElementById("newWish2").value.trim();
+      const wish3 = document.getElementById("newWish3").value.trim();
+
+      if (!codeName) return alert("Please enter a code name.");
+
+      const params = new URLSearchParams({
+        action: "add",
+        codeName, wish1, wish2, wish3
+      });
+
+      const res = await fetch(`${webAppUrl}?${params}`);
+      const data = await res.json();
+      document.getElementById("addResult").innerHTML = data.success
+        ? "<p style='color:green;'>Entry added successfully!</p>"
+        : "<p style='color:red;'>Error adding entry.</p>";
+    }
+  </script>
+</body>
+</html>
