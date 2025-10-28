@@ -24,7 +24,7 @@
 
     .login-btn {
       background-color: transparent;
-      color:gray;
+      color: gray;
       cursor: pointer;
       font-weight: bold;
       transition: all 0.3s ease;
@@ -79,6 +79,22 @@
     #adminSection {
       display: none;
     }
+
+    #downloadBtn {
+      margin-top: 10px;
+      display: none;
+      background-color: #ffae42;
+      color: black;
+      border: none;
+      width: auto;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #downloadBtn:hover {
+      background-color: #ffc96b;
+    }
   </style>
 </head>
 <body>
@@ -93,6 +109,7 @@
     <button onclick="lookupWish()">Reveal!</button>
 
     <div id="result"></div>
+    <button id="downloadBtn" onclick="downloadCSV()">⬇️ Download as CSV</button>
   </div>
 
   <!-- Hidden Admin Section -->
@@ -108,6 +125,7 @@
 
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbyfb5wWBN-AmxoHddl6gBWX9zf8tBwcEU7TIAC7PNU7HJQA9y4B4BYUe8di1Jg-bV4H/exec";
+    let currentWishData = null; // Store last revealed wishes
 
     // Look up wish by code name
     async function lookupWish() {
@@ -121,6 +139,8 @@
       const data = await response.json();
 
       const resultDiv = document.getElementById("result");
+      const downloadBtn = document.getElementById("downloadBtn");
+
       if (data && data.found) {
         resultDiv.innerHTML = `
           <h3>✨ ${data.codeName}</h3>
@@ -128,9 +148,28 @@
           <p><strong>Wish 2:</strong> ${data.wish2}</p>
           <p><strong>Wish 3:</strong> ${data.wish3}</p>
         `;
+        currentWishData = data;
+        downloadBtn.style.display = "inline-block";
       } else {
         resultDiv.innerHTML = `<p>No data found for "<strong>${codeName}</strong>" 😢</p>`;
+        currentWishData = null;
+        downloadBtn.style.display = "none";
       }
+    }
+
+    // Download CSV (with date)
+    function downloadCSV() {
+      if (!currentWishData) return;
+
+      const { codeName, wish1, wish2, wish3 } = currentWishData;
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const csvContent = `Code Name,Wish 1,Wish 2,Wish 3\n"${codeName}","${wish1}","${wish2}","${wish3}"`;
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${codeName}_Wishes_${today}.csv`;
+      link.click();
     }
 
     // Admin Login
