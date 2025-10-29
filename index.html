@@ -14,7 +14,7 @@
       color: #fff;
     }
 
-    /* Fixed header to stay at the very top-right corner */
+    /* Fixed header */
     .header {
       position: fixed;
       top: 10px;
@@ -66,7 +66,7 @@
     }
 
     button:hover {
-      background-color:#5f5285;
+      background-color: #5f5285;
     }
 
     #result {
@@ -74,6 +74,12 @@
       background: rgba(255, 255, 255, 0.1);
       padding: 10px;
       border-radius: 8px;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    #result.visible {
+      opacity: 1;
     }
 
     #adminSection {
@@ -94,6 +100,34 @@
 
     #downloadBtn:hover {
       background-color: #ffc96b;
+      color: black;
+    }
+
+    .admin-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .admin-buttons button,
+    .admin-buttons a {
+      background-color: #6b4f9e;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      display: inline-block;
+      font-weight: bold;
+      transition: 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .admin-buttons button:hover,
+    .admin-buttons a:hover {
+      background-color: #8b6fc8;
     }
   </style>
 </head>
@@ -119,13 +153,20 @@
     <input type="text" id="wish1" placeholder="Wish 1" />
     <input type="text" id="wish2" placeholder="Wish 2" />
     <input type="text" id="wish3" placeholder="Wish 3" />
-    <button onclick="addEntry()">Add Entry</button>
+    <button onclick="addEntry(event)">Add Entry</button>
+
+    <!-- See List button below Add Entry -->
+    <div class="admin-buttons">
+      <a href="https://docs.google.com/spreadsheets/d/1sW56Wuxpk7gsCHKQ4gMSdCF9NF1i2RvCDdDSdJVvUhM/edit?gid=0#gid=0" target="_blank">📜 See List</a>
+      <button onclick="closeAdmin()">Close Admin Panel</button>
+    </div>
+
     <p id="adminMessage"></p>
   </div>
 
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbyfb5wWBN-AmxoHddl6gBWX9zf8tBwcEU7TIAC7PNU7HJQA9y4B4BYUe8di1Jg-bV4H/exec";
-    let currentWishData = null; // Store last revealed wishes
+    let currentWishData = null;
 
     // Look up wish by code name
     async function lookupWish() {
@@ -141,6 +182,8 @@
       const resultDiv = document.getElementById("result");
       const downloadBtn = document.getElementById("downloadBtn");
 
+      resultDiv.classList.remove("visible");
+
       if (data && data.found) {
         resultDiv.innerHTML = `
           <h3>✨ ${data.codeName}</h3>
@@ -155,14 +198,16 @@
         currentWishData = null;
         downloadBtn.style.display = "none";
       }
+
+      setTimeout(() => resultDiv.classList.add("visible"), 100);
     }
 
-    // Download CSV (with date)
+    // Download CSV
     function downloadCSV() {
       if (!currentWishData) return;
 
       const { codeName, wish1, wish2, wish3 } = currentWishData;
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const today = new Date().toISOString().split('T')[0];
       const csvContent = `Code Name,Wish 1,Wish 2,Wish 3\n"${codeName}","${wish1}","${wish2}","${wish3}"`;
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -183,8 +228,18 @@
       }
     }
 
+    // Close Admin Panel
+    function closeAdmin() {
+      document.getElementById("adminSection").style.display = "none";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // Add new entry
-    async function addEntry() {
+    async function addEntry(event) {
+      const addBtn = event.target;
+      addBtn.disabled = true;
+      addBtn.innerText = "Adding...";
+
       const newCodeName = document.getElementById("newCodeName").value.trim();
       const wish1 = document.getElementById("wish1").value.trim();
       const wish2 = document.getElementById("wish2").value.trim();
@@ -192,6 +247,8 @@
 
       if (!newCodeName || !wish1 || !wish2 || !wish3) {
         alert("Please fill out all fields.");
+        addBtn.disabled = false;
+        addBtn.innerText = "Add Entry";
         return;
       }
 
@@ -208,10 +265,15 @@
 
       const result = await response.text();
       document.getElementById("adminMessage").innerText = result;
+
+      // Reset form
       document.getElementById("newCodeName").value = "";
       document.getElementById("wish1").value = "";
       document.getElementById("wish2").value = "";
       document.getElementById("wish3").value = "";
+
+      addBtn.disabled = false;
+      addBtn.innerText = "Add Entry";
     }
   </script>
 </body>
