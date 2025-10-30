@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wishlist Mirror</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Henny+Penny&display=swap');
+
     body {
-      font-family: 'Syne Mono', sans-serif;
+      font-family: 'Henny Penny', cursive;
       background: url('https://res.cloudinary.com/eventmobi/image/upload/v1761682061/_James%20Assets/.test%20app%20assets/MML%20October%202025/62422-504238932_small-ezgif.com-video-to-gif-converter.gif') no-repeat center center fixed;
       background-size: cover;
       margin: 0;
@@ -30,7 +32,8 @@
       transition: all 0.3s ease;
       text-decoration: underline;
       border: none;
-      font-size: 13px;
+      font-size: 16px;
+      font-family: 'Henny Penny', cursive;
     }
 
     .login-btn:hover {
@@ -45,15 +48,18 @@
       border-radius: 12px;
       text-align: center;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      font-family: 'Henny Penny', cursive;
     }
 
-    input, button {
+    input {
       width: 70%;
-      padding: 20px;
-      margin: 6px 0;
-      border-radius: 6px;
+      padding: 18px;
+      margin: 8px 0;
+      border-radius: 10px;
       border: none;
-      font-size: 16px;
+      font-size: 18px;
+      font-family: 'Henny Penny', cursive;
+      text-align: center;
     }
 
     button {
@@ -62,7 +68,13 @@
       font-weight: bold;
       cursor: pointer;
       transition: 0.3s;
-      width: 30%;
+      width: auto;
+      min-width: 120px;
+      padding: 12px 20px;
+      margin: 5px 5px 0 0;
+      border-radius: 12px;
+      font-size: 18px;
+      font-family: 'Henny Penny', cursive;
     }
 
     button:hover {
@@ -72,10 +84,11 @@
     #result {
       margin-top: 20px;
       background: rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      border-radius: 8px;
+      padding: 15px;
+      border-radius: 10px;
       opacity: 0;
       transition: opacity 0.8s ease;
+      font-size: 18px;
     }
 
     #result.visible {
@@ -86,19 +99,19 @@
       display: none;
     }
 
-    #downloadBtn {
-      margin-top: 10px;
-      display: none;
+    #downloadBtn, #emailBtn {
       background-color:#463b64;
       color: white;
       border: none;
-      width: auto;
-      padding: 10px 20px;
-      border-radius: 8px;
+      border-radius: 12px;
+      padding: 12px 20px;
       cursor: pointer;
+      font-size: 18px;
+      font-family: 'Henny Penny', cursive;
+      transition: 0.3s;
     }
 
-    #downloadBtn:hover {
+    #downloadBtn:hover, #emailBtn:hover {
       background-color: #ffc96b;
       color: black;
     }
@@ -116,18 +129,29 @@
       background-color:transparent;
       color: white;
       text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 8px;
+      padding: 12px 20px;
+      border-radius: 12px;
       display: inline-block;
       font-weight: bold;
       transition: 0.3s;
       border: none;
       cursor: pointer;
+      font-family: 'Henny Penny', cursive;
+      font-size: 18px;
     }
 
     .admin-buttons button:hover,
     .admin-buttons a:hover {
       background-color: #8b6fc8;
+    }
+
+    /* Make CSV and Email buttons inline on small screens */
+    .button-group {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -143,10 +167,12 @@
     <button onclick="lookupWish()">Reveal!</button>
 
     <div id="result"></div>
-    <button id="downloadBtn" onclick="downloadCSV()">⬇️ Download as CSV</button>
+    <div class="button-group">
+      <button id="downloadBtn" onclick="downloadCSV()">⬇️ Download as CSV</button>
+      <button id="emailBtn" onclick="emailResult()">📧 Email Result</button>
+    </div>
   </div>
 
-  <!-- Hidden Admin Section -->
   <div class="container" id="adminSection">
     <h3>Add New Entry</h3>
     <input type="text" id="newCodeName" placeholder="Code Name" />
@@ -155,7 +181,6 @@
     <input type="text" id="wish3" placeholder="Wish 3" />
     <button onclick="addEntry(event)">Add Entry</button>
 
-    <!-- See List button below Add Entry -->
     <div class="admin-buttons">
       <a href="https://docs.google.com/spreadsheets/d/1sW56Wuxpk7gsCHKQ4gMSdCF9NF1i2RvCDdDSdJVvUhM/edit?gid=0#gid=0" target="_blank">📜 See List</a>
       <button onclick="closeAdmin()">Close Admin Panel</button>
@@ -168,44 +193,48 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbyfb5wWBN-AmxoHddl6gBWX9zf8tBwcEU7TIAC7PNU7HJQA9y4B4BYUe8di1Jg-bV4H/exec";
     let currentWishData = null;
 
-    // Look up wish by code name
     async function lookupWish() {
       const codeName = document.getElementById("codeName").value.trim();
-      if (!codeName) {
-        alert("Please enter a Code Name");
-        return;
+      if (!codeName) { alert("Please enter a Code Name"); return; }
+
+      try {
+        const response = await fetch(`${scriptURL}?action=lookup&codeName=${encodeURIComponent(codeName)}`);
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+
+        const resultDiv = document.getElementById("result");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const emailBtn = document.getElementById("emailBtn");
+
+        resultDiv.classList.remove("visible");
+
+        if (data && data.found) {
+          resultDiv.innerHTML = `
+            <h3>✨ ${data.codeName}</h3>
+            <p><strong>Wish 1:</strong> ${data.wish1}</p>
+            <p><strong>Wish 2:</strong> ${data.wish2}</p>
+            <p><strong>Wish 3:</strong> ${data.wish3}</p>
+          `;
+          currentWishData = data;
+          downloadBtn.style.display = "inline-block";
+          emailBtn.style.display = "inline-block";
+        } else {
+          resultDiv.innerHTML = `<p>No data found for "<strong>${codeName}</strong>" 😢</p>`;
+          currentWishData = null;
+          downloadBtn.style.display = "none";
+          emailBtn.style.display = "none";
+        }
+
+        setTimeout(() => resultDiv.classList.add("visible"), 100);
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert("Error fetching data: " + error.message);
+        console.error(error);
       }
-
-      const response = await fetch(`${scriptURL}?action=lookup&codeName=${encodeURIComponent(codeName)}`);
-      const data = await response.json();
-
-      const resultDiv = document.getElementById("result");
-      const downloadBtn = document.getElementById("downloadBtn");
-
-      resultDiv.classList.remove("visible");
-
-      if (data && data.found) {
-        resultDiv.innerHTML = `
-          <h3>✨ ${data.codeName}</h3>
-          <p><strong>Wish 1:</strong> ${data.wish1}</p>
-          <p><strong>Wish 2:</strong> ${data.wish2}</p>
-          <p><strong>Wish 3:</strong> ${data.wish3}</p>
-        `;
-        currentWishData = data;
-        downloadBtn.style.display = "inline-block";
-      } else {
-        resultDiv.innerHTML = `<p>No data found for "<strong>${codeName}</strong>" 😢</p>`;
-        currentWishData = null;
-        downloadBtn.style.display = "none";
-      }
-
-      setTimeout(() => resultDiv.classList.add("visible"), 100);
     }
 
-    // Download CSV
     function downloadCSV() {
       if (!currentWishData) return;
-
       const { codeName, wish1, wish2, wish3 } = currentWishData;
       const today = new Date().toISOString().split('T')[0];
       const csvContent = `Code Name,Wish 1,Wish 2,Wish 3\n"${codeName}","${wish1}","${wish2}","${wish3}"`;
@@ -217,28 +246,37 @@
       link.click();
     }
 
-    // Admin Login
+    function emailResult() {
+      if (!currentWishData) return;
+      const { codeName, wish1, wish2, wish3 } = currentWishData;
+      const subject = encodeURIComponent(`Your Wishlist Mirror Result for ${codeName}`);
+      const body = encodeURIComponent(
+        `Hello!\n\nHere is the wishlist result from the Mirror:\n\n` +
+        `Code Name: ${codeName}\n` +
+        `Wish 1: ${wish1}\n` +
+        `Wish 2: ${wish2}\n` +
+        `Wish 3: ${wish3}\n\n` +
+        `May your wishes come true! ✨`
+      );
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }
+
     function showLogin() {
       const password = prompt("Enter admin password:");
       if (password === "escape2025") {
         document.getElementById("adminSection").style.display = "block";
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      } else {
-        alert("Incorrect password!");
-      }
+      } else { alert("Incorrect password!"); }
     }
 
-    // Close Admin Panel
     function closeAdmin() {
       document.getElementById("adminSection").style.display = "none";
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Add new entry
     async function addEntry(event) {
       const addBtn = event.target;
-      addBtn.disabled = true;
-      addBtn.innerText = "Adding...";
+      addBtn.disabled = true; addBtn.innerText = "Adding...";
 
       const newCodeName = document.getElementById("newCodeName").value.trim();
       const wish1 = document.getElementById("wish1").value.trim();
@@ -247,33 +285,24 @@
 
       if (!newCodeName || !wish1 || !wish2 || !wish3) {
         alert("Please fill out all fields.");
-        addBtn.disabled = false;
-        addBtn.innerText = "Add Entry";
+        addBtn.disabled = false; addBtn.innerText = "Add Entry";
         return;
       }
 
       const response = await fetch(scriptURL, {
         method: "POST",
-        body: new URLSearchParams({
-          action: "add",
-          codeName: newCodeName,
-          wish1,
-          wish2,
-          wish3
-        })
+        body: new URLSearchParams({ action: "add", codeName: newCodeName, wish1, wish2, wish3 })
       });
 
       const result = await response.text();
       document.getElementById("adminMessage").innerText = result;
 
-      // Reset form
       document.getElementById("newCodeName").value = "";
       document.getElementById("wish1").value = "";
       document.getElementById("wish2").value = "";
       document.getElementById("wish3").value = "";
 
-      addBtn.disabled = false;
-      addBtn.innerText = "Add Entry";
+      addBtn.disabled = false; addBtn.innerText = "Add Entry";
     }
   </script>
 </body>
