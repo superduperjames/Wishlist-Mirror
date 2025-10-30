@@ -54,7 +54,7 @@
 
     input {
       width: 70%;
-      padding: 18px;
+      padding: 14px;
       margin: 8px 0;
       border-radius: 10px;
       border: none;
@@ -233,9 +233,9 @@
         if (data && data.found) {
           resultDiv.innerHTML = `
             <h3>✨ ${data.codeName}</h3>
-            <p><strong>Wish 1:</strong> ${makeLinkIfURL(data.wish1)}</p>
-            <p><strong>Wish 2:</strong> ${makeLinkIfURL(data.wish2)}</p>
-            <p><strong>Wish 3:</strong> ${makeLinkIfURL(data.wish3)}</p>
+            <p><strong>Wish 1:🪄 </strong> ${makeLinkIfURL(data.wish1)}</p>
+            <p><strong>Wish 2:🪄 </strong> ${makeLinkIfURL(data.wish2)}</p>
+            <p><strong>Wish 3:🪄 </strong> ${makeLinkIfURL(data.wish3)}</p>
           `;
           currentWishData = data;
           downloadBtn.style.display = "inline-block";
