@@ -176,7 +176,7 @@
     <div id="result"></div>
     <div class="button-group">
       <button id="downloadBtn" onclick="downloadCSV()">⬇️ Download as CSV</button>
-      <button id="emailBtn" onclick="emailResult()">📧 Email Result</button>
+      <button id="emailBtn" onclick="emailResult()">📧 Email Results to Myself</button>
     </div>
   </div>
 
@@ -215,7 +215,7 @@
 
       if (!codeName) { alert("Please enter a Code Name"); return; }
 
-      resultDiv.innerHTML = "<p>🔮 Loading your fate... please wait...</p>";
+      resultDiv.innerHTML = "<p>🔮 Loading results... hang tight...</p>";
       resultDiv.classList.add("visible");
       downloadBtn.style.display = "none";
       emailBtn.style.display = "none";
@@ -277,7 +277,7 @@
         `Wish 1: ${wish1}\n` +
         `Wish 2: ${wish2}\n` +
         `Wish 3: ${wish3}\n\n` +
-        `May your wishes come true! ✨`
+        `May you make their wishes come true! ✨`
       );
       const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`;
       window.open(gmailUrl, "_blank");
