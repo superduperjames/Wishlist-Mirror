@@ -85,14 +85,19 @@
     /* Results box - Poppins for readability */
     #result {
       margin-top: 20px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(0,0,0,0.7);
       padding: 15px;
       border-radius: 10px;
       opacity: 0;
       transition: opacity 0.8s ease;
-      font-size: 18px;
+      font-size: 17px;
       font-family: 'Poppins', sans-serif;
       text-align: left;
+    }
+
+    #result a {
+      color: #ffc96b;
+      text-decoration: underline;
     }
 
     #result.visible {
@@ -197,6 +202,13 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbyfb5wWBN-AmxoHddl6gBWX9zf8tBwcEU7TIAC7PNU7HJQA9y4B4BYUe8di1Jg-bV4H/exec";
     let currentWishData = null;
 
+    function makeLinkIfURL(text) {
+      const urlPattern = /(https?:\/\/[^\s]+)/g;
+      return text.replace(urlPattern, function(url) {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      });
+    }
+
     async function lookupWish() {
       const codeName = document.getElementById("codeName").value.trim();
       const resultDiv = document.getElementById("result");
@@ -206,7 +218,7 @@
       if (!codeName) { alert("Please enter a Code Name"); return; }
 
       // Show loading message
-      resultDiv.innerHTML = "<p>🔮 Loading results... please wait...</p>";
+      resultDiv.innerHTML = "<p>🔮 Loading your results... hang tight...</p>";
       resultDiv.classList.add("visible");
       downloadBtn.style.display = "none";
       emailBtn.style.display = "none";
@@ -221,9 +233,9 @@
         if (data && data.found) {
           resultDiv.innerHTML = `
             <h3>✨ ${data.codeName}</h3>
-            <p><strong>Wish 1:</strong> ${data.wish1}</p>
-            <p><strong>Wish 2:</strong> ${data.wish2}</p>
-            <p><strong>Wish 3:</strong> ${data.wish3}</p>
+            <p><strong>Wish 1:</strong> ${makeLinkIfURL(data.wish1)}</p>
+            <p><strong>Wish 2:</strong> ${makeLinkIfURL(data.wish2)}</p>
+            <p><strong>Wish 3:</strong> ${makeLinkIfURL(data.wish3)}</p>
           `;
           currentWishData = data;
           downloadBtn.style.display = "inline-block";
@@ -265,9 +277,9 @@
       const body = encodeURIComponent(
         `Hello!\n\nHere is the wishlist result from the Mirror:\n\n` +
         `Code Name: ${codeName}\n` +
-        `Wish 1: ${wish1}\n` +
-        `Wish 2: ${wish2}\n` +
-        `Wish 3: ${wish3}\n\n` +
+        `Wish 1: 👉 ${wish1}\n` +
+        `Wish 2: 👉 ${wish2}\n` +
+        `Wish 3: 👉 ${wish3}\n\n` +
         `May your wishes come true! ✨`
       );
       window.location.href = `mailto:?subject=${subject}&body=${body}`;
