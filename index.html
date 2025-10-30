@@ -91,7 +91,7 @@
       opacity: 0;
       transition: opacity 0.8s ease;
       font-size: 18px;
-      font-family: 'Poppins', sans-serif; /* Changed font */
+      font-family: 'Poppins', sans-serif;
       text-align: left;
     }
 
@@ -199,16 +199,22 @@
 
     async function lookupWish() {
       const codeName = document.getElementById("codeName").value.trim();
+      const resultDiv = document.getElementById("result");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const emailBtn = document.getElementById("emailBtn");
+
       if (!codeName) { alert("Please enter a Code Name"); return; }
+
+      // Show loading message
+      resultDiv.innerHTML = "<p>🔮 Loading results... please wait...</p>";
+      resultDiv.classList.add("visible");
+      downloadBtn.style.display = "none";
+      emailBtn.style.display = "none";
 
       try {
         const response = await fetch(`${scriptURL}?action=lookup&codeName=${encodeURIComponent(codeName)}`);
         if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
-
-        const resultDiv = document.getElementById("result");
-        const downloadBtn = document.getElementById("downloadBtn");
-        const emailBtn = document.getElementById("emailBtn");
 
         resultDiv.classList.remove("visible");
 
@@ -231,8 +237,11 @@
 
         setTimeout(() => resultDiv.classList.add("visible"), 100);
         resultDiv.scrollIntoView({ behavior: 'smooth' });
+
       } catch (error) {
-        alert("Error fetching data: " + error.message);
+        resultDiv.innerHTML = `<p>Error fetching data. Please try again.</p>`;
+        downloadBtn.style.display = "none";
+        emailBtn.style.display = "none";
         console.error(error);
       }
     }
@@ -242,7 +251,6 @@
       const { codeName, wish1, wish2, wish3 } = currentWishData;
       const today = new Date().toISOString().split('T')[0];
       const csvContent = `Code Name,Wish 1,Wish 2,Wish 3\n"${codeName}","${wish1}","${wish2}","${wish3}"`;
-
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
